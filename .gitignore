@@ -3,6 +3,7 @@
 __pycache__
 model_weights
 matching/model_weights
+matching/third_party/*/
 outputs_*
 outputs
 *.egg-info/*
