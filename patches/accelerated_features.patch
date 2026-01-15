@@ -1,0 +1,24 @@
+diff --git a/modules/xfeat.py b/modules/xfeat.py
+index 1e462c1..b424318 100644
+--- a/modules/xfeat.py
++++ b/modules/xfeat.py
+@@ -8,6 +8,8 @@ import numpy as np
+ import os
+ import torch
+ import torch.nn.functional as F
++import contextlib
++
+ 
+ import tqdm
+ 
+@@ -142,7 +144,9 @@ class XFeat(nn.Module):
+ 			raise RuntimeError('We rely on kornia for LightGlue. Install with: pip install kornia')
+ 		elif self.lighterglue is None:
+ 			from modules.lighterglue import LighterGlue
+-			self.lighterglue = LighterGlue()
++			# Suppress "Loaded LightGlue model" print from Kornia/LightGlue
++			with open(os.devnull, "w") as f, contextlib.redirect_stdout(f):
++				self.lighterglue = LighterGlue()
+ 
+ 		data = {
+ 				'keypoints0': d0['keypoints'][None, ...],

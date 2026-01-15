@@ -4,6 +4,10 @@ homography between two images is computed correctly. The two images are generate
 as one is a warping of the other.
 """
 
+import os
+import sys
+# Add project root to sys.path
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 from matching import get_matcher, available_models, get_default_device
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
 import cv2
@@ -30,7 +34,7 @@ def parse_args():
         formatter_class=RawDescriptionHelpFormatter,
     )
     parser.add_argument(
-        "--matchers",
+        "--matcher",
         type=str,
         nargs="+",
         default="all",
@@ -44,8 +48,8 @@ def parse_args():
     )
     args = parser.parse_args()
 
-    if args.matchers == "all":
-        args.matchers = available_models
+    if args.matcher == "all":
+        args.matcher = available_models
     return args
 
 
@@ -68,8 +72,8 @@ def run_single_matcher(matcher_name, img_size, device):
 
 def benchmark_and_test(matcher, img_size=512, runs=5):
     """Runs the homography test multiple times to get both speed and accuracy."""
-    img0_path = "assets/example_test/warped.jpg"
-    img1_path = "assets/example_test/original.jpg"
+    img0_path = os.path.join(os.path.dirname(__file__), "../assets/example_test/warped.jpg")
+    img1_path = os.path.join(os.path.dirname(__file__), "../assets/example_test/original.jpg")
     ground_truth = np.array([[0.1500, 0.3500], [0.9500, 0.1500], [0.9000, 0.7000], [0.2500, 0.7000]])
 
     # Pre-load to avoid I/O overhead in loop if desired, or keep inside if part of test
@@ -110,7 +114,7 @@ def main():
     print(f"{'model_name':<30} {'speed':<10} {'homography test':<15}")
     print("-" * 58)
 
-    for matcher_name in args.matchers:
+    for matcher_name in args.matcher:
         if matcher_name in ["sift-sphereglue", "superpoint-sphereglue"]:
             # Sperical matchers can't be tested on homography
             continue
@@ -118,7 +122,7 @@ def main():
         print("\033[0m", end="")
 
         # Run each matcher in a subprocess for isolation
-        cmd = [sys.executable, "-m", "imm_benchmark"]
+        cmd = [sys.executable, os.path.abspath(__file__)]
         cmd.extend(
             [
                 "--single-matcher-json",

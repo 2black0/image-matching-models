@@ -1,0 +1,147 @@
+diff --git a/lisrd/datasets/hpatches.py b/lisrd/datasets/hpatches.py
+index 25c55e4..52aed2e 100755
+--- a/lisrd/datasets/hpatches.py
++++ b/lisrd/datasets/hpatches.py
+@@ -119,13 +119,13 @@ class _Dataset(Dataset):
+                                           img_size).repeat(4, 1, 1, 1)
+                 features[m]['meta_descriptors0'] = F.normalize(F.grid_sample(
+                     meta_desc0_t,
+-                    grid0).squeeze(3).permute(2, 0, 1), dim=2).numpy()
++                    grid0, align_corners=True).squeeze(3).permute(2, 0, 1), dim=2).numpy()
+                 meta_desc1_t = torch.tensor(feat1['meta_descriptors'])
+                 grid1 = keypoints_to_grid(torch.tensor(kp1),
+                                           img_size).repeat(4, 1, 1, 1)
+                 features[m]['meta_descriptors1'] = F.normalize(F.grid_sample(
+                     meta_desc1_t,
+-                    grid1).squeeze(3).permute(2, 0, 1), dim=2).numpy()
++                    grid1, align_corners=True).squeeze(3).permute(2, 0, 1), dim=2).numpy()
+         
+         return {'image0': img0, 'image1': img1, 'homography': H,
+                 'img0_path': img0_path, 'img1_path': img1_path,
+diff --git a/lisrd/datasets/rdnim.py b/lisrd/datasets/rdnim.py
+index 68d9e6b..e4949b6 100755
+--- a/lisrd/datasets/rdnim.py
++++ b/lisrd/datasets/rdnim.py
+@@ -101,13 +101,13 @@ class _Dataset(Dataset):
+                                           img_size).repeat(4, 1, 1, 1)
+                 features[m]['meta_descriptors0'] = F.normalize(F.grid_sample(
+                     meta_desc0_t,
+-                    grid0).squeeze(3).permute(2, 0, 1), dim=2).numpy()
++                    grid0, align_corners=True).squeeze(3).permute(2, 0, 1), dim=2).numpy()
+                 meta_desc1_t = torch.tensor(feat1['meta_descriptors'])
+                 grid1 = keypoints_to_grid(torch.tensor(kp1),
+                                           img_size).repeat(4, 1, 1, 1)
+                 features[m]['meta_descriptors1'] = F.normalize(F.grid_sample(
+                     meta_desc1_t,
+-                    grid1).squeeze(3).permute(2, 0, 1), dim=2).numpy()
++                    grid1, align_corners=True).squeeze(3).permute(2, 0, 1), dim=2).numpy()
+                 
+         return {'img0': img0, 'img1': img1, 'img_size': img_size,
+                 'timestamp': self._paths[item]['timestamp'],
+diff --git a/lisrd/export_features.py b/lisrd/export_features.py
+index 4d00b40..90ef81e 100644
+--- a/lisrd/export_features.py
++++ b/lisrd/export_features.py
+@@ -83,7 +83,7 @@ def export(images_list, model, checkpoint, keypoints_type,
+             descriptors, meta_descriptors = [], []
+             for k in descs.keys():
+                 desc = func.normalize(
+-                    func.grid_sample(descs[k], grid_points),
++                    func.grid_sample(descs[k], grid_points, align_corners=True),
+                     dim=1).squeeze().cpu().numpy().transpose(1, 0)
+                 descriptors.append(desc)
+                 meta_descriptors.append(
+diff --git a/lisrd/utils/geometry_utils.py b/lisrd/utils/geometry_utils.py
+index 3409e8f..09da5bb 100755
+--- a/lisrd/utils/geometry_utils.py
++++ b/lisrd/utils/geometry_utils.py
+@@ -81,7 +81,7 @@ def extract_descriptors(keypoints, descriptors, meta_descriptors, img_size):
+     # Extract the local descriptors
+     descs = []
+     for k in descriptors.keys():
+-        desc = func.normalize(func.grid_sample(descriptors[k], grid_points),
++        desc = func.normalize(func.grid_sample(descriptors[k], grid_points, align_corners=True),
+                               dim=1)[0, :, :, 0].t()
+         descs.append(desc)
+     descs = torch.stack(descs, dim=1)
+@@ -90,7 +90,7 @@ def extract_descriptors(keypoints, descriptors, meta_descriptors, img_size):
+     meta_descs = []
+     for k in meta_descriptors.keys():
+         meta_desc = func.normalize(
+-            func.grid_sample(meta_descriptors[k], grid_points),
++            func.grid_sample(meta_descriptors[k], grid_points, align_corners=True),
+             dim=1)[0, :, :, 0].t()
+         meta_descs.append(meta_desc)
+     meta_descs = torch.stack(meta_descs, dim=1)
+diff --git a/lisrd/utils/losses.py b/lisrd/utils/losses.py
+index 98e929a..19da871 100644
+--- a/lisrd/utils/losses.py
++++ b/lisrd/utils/losses.py
+@@ -65,10 +65,10 @@ def invar_desc_triplet_loss(desc0, desc1, inputs, config, device):
+     grid1 = keypoints_to_grid(keypoints1, img_size)
+     
+     # Extract the descriptors
+-    valid_desc0 = func.grid_sample(desc0, grid0).permute(
++    valid_desc0 = func.grid_sample(desc0, grid0, align_corners=True).permute(
+         0, 2, 3, 1).reshape(n_correct_points, -1)
+     valid_desc0 = func.normalize(valid_desc0, dim=1)
+-    valid_desc1 = func.grid_sample(desc1, grid1).permute(
++    valid_desc1 = func.grid_sample(desc1, grid1, align_corners=True).permute(
+         0, 2, 3, 1).reshape(n_correct_points, -1)
+     valid_desc1 = func.normalize(valid_desc1, dim=1)
+     desc_dist = 2 - 2 * (valid_desc0 @ valid_desc1.t())
+@@ -104,13 +104,13 @@ def var_desc_triplet_loss(desc0, desc1, desc2, gap, inputs, config, device):
+     grid2 = keypoints_to_grid(keypoints2, img_size)
+     
+     # Extract the descriptors
+-    valid_desc0 = func.grid_sample(desc0, grid0).permute(
++    valid_desc0 = func.grid_sample(desc0, grid0, align_corners=True).permute(
+         0, 2, 3, 1).reshape(n_correct_points, -1)
+     valid_desc0 = func.normalize(valid_desc0, dim=1)
+-    valid_desc1 = func.grid_sample(desc1, grid1).permute(
++    valid_desc1 = func.grid_sample(desc1, grid1, align_corners=True).permute(
+         0, 2, 3, 1).reshape(n_correct_points, -1)
+     valid_desc1 = func.normalize(valid_desc1, dim=1)
+-    valid_desc2 = func.grid_sample(desc2, grid2).permute(
++    valid_desc2 = func.grid_sample(desc2, grid2, align_corners=True).permute(
+         0, 2, 3, 1).reshape(n_correct_points, -1)
+     valid_desc2 = func.normalize(valid_desc2, dim=1)
+ 
+diff --git a/lisrd/utils/metrics.py b/lisrd/utils/metrics.py
+index 6c1a348..bffd189 100644
+--- a/lisrd/utils/metrics.py
++++ b/lisrd/utils/metrics.py
+@@ -33,27 +33,27 @@ def matching_score(inputs, descs, meta_descs=None, device='cuda:0'):
+     if meta_descs:
+         descs_n, meta_descs_n = [], []
+         for i in range(len(descs)):
+-            desc0 = func.grid_sample(descs[i][0], grid0).permute(
++            desc0 = func.grid_sample(descs[i][0], grid0, align_corners=True).permute(
+                 0, 2, 3, 1).reshape(n_correct_points, -1)
+             desc0 = func.normalize(desc0, dim=1)
+-            desc1 = func.grid_sample(descs[i][1], grid1).permute(
++            desc1 = func.grid_sample(descs[i][1], grid1, align_corners=True).permute(
+                 0, 2, 3, 1).reshape(n_correct_points, -1)
+             desc1 = func.normalize(desc1, dim=1)
+             descs_n.append([desc0, desc1])
+ 
+-            meta_desc0 = func.grid_sample(meta_descs[i][0], grid0).permute(
++            meta_desc0 = func.grid_sample(meta_descs[i][0], grid0, align_corners=True).permute(
+                 0, 2, 3, 1).reshape(n_correct_points, -1)
+             meta_desc0 = func.normalize(meta_desc0, dim=1)
+-            meta_desc1 = func.grid_sample(meta_descs[i][1], grid1).permute(
++            meta_desc1 = func.grid_sample(meta_descs[i][1], grid1, align_corners=True).permute(
+                 0, 2, 3, 1).reshape(n_correct_points, -1)
+             meta_desc1 = func.normalize(meta_desc1, dim=1)
+             meta_descs_n.append([meta_desc0, meta_desc1])
+         desc_dist = get_lisrd_desc_dist(descs_n, meta_descs_n)
+     else:
+-        desc0 = func.grid_sample(descs[0][0], grid0).permute(
++        desc0 = func.grid_sample(descs[0][0], grid0, align_corners=True).permute(
+             0, 2, 3, 1).reshape(n_correct_points, -1)
+         desc0 = func.normalize(desc0, dim=1)
+-        desc1 = func.grid_sample(descs[0][1], grid1).permute(
++        desc1 = func.grid_sample(descs[0][1], grid1, align_corners=True).permute(
+             0, 2, 3, 1).reshape(n_correct_points, -1)
+         desc1 = func.normalize(desc1, dim=1)
+         desc_dist = 2 - 2 * (desc0 @ desc1.t())

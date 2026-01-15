@@ -3,3 +3,6 @@ assets/example_pairs/false_positive/chartres.jpg assets/example_pairs/false_posi
 assets/example_pairs/fresco/fsm.jpg assets/example_pairs/fresco/sist_chapel.jpg
 assets/example_pairs/sat2iss/photo_from_iss.jpg assets/example_pairs/sat2iss/satellite_img.jpg
 assets/example_pairs/outdoor/montmartre_close.jpg assets/example_pairs/outdoor/montmartre_far.jpg
+assets/example_pairs/picture/ref.png assets/example_pairs/picture/tgt.png
+assets/example_pairs/picture_rotation/ref.png assets/example_pairs/picture_rotation/tgt_rot.png
+assets/example_pairs/thermal/thermal.jpg assets/example_pairs/thermal/visible.jpg

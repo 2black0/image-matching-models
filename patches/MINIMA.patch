@@ -1,0 +1,12 @@
+diff --git a/third_party/LoFTR b/third_party/LoFTR
+--- a/third_party/LoFTR
++++ b/third_party/LoFTR
+@@ -1 +1 @@
+-Subproject commit df7ca80f917334b94cfbe32cc2901e09a80e70a8
++Subproject commit df7ca80f917334b94cfbe32cc2901e09a80e70a8-dirty
+diff --git a/third_party/XoFTR b/third_party/XoFTR
+--- a/third_party/XoFTR
++++ b/third_party/XoFTR
+@@ -1 +1 @@
+-Subproject commit e9635d8baf95b5731bb1a142eff9a479a99e1e3b
++Subproject commit e9635d8baf95b5731bb1a142eff9a479a99e1e3b-dirty

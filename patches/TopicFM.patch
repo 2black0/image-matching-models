@@ -1,0 +1,6 @@
+diff --git a/third_party/loftr b/third_party/loftr
+--- a/third_party/loftr
++++ b/third_party/loftr
+@@ -1 +1 @@
+-Subproject commit df7ca80f917334b94cfbe32cc2901e09a80e70a8
++Subproject commit df7ca80f917334b94cfbe32cc2901e09a80e70a8-dirty

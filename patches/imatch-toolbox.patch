@@ -1,0 +1,6 @@
+diff --git a/third_party/superglue b/third_party/superglue
+--- a/third_party/superglue
++++ b/third_party/superglue
+@@ -1 +1 @@
+-Subproject commit c0626d58c843ee0464b0fa1dd4de4059bfae0ab4
++Subproject commit c0626d58c843ee0464b0fa1dd4de4059bfae0ab4-dirty

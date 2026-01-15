@@ -1,0 +1,47 @@
+diff --git a/dino_extract_gpu_fix.patch b/dino_extract_gpu_fix.patch
+new file mode 100644
+index 0000000..358e1a8
+--- /dev/null
++++ b/dino_extract_gpu_fix.patch
+@@ -0,0 +1,38 @@
++--- a/src/omniglue/dino_extract.py
+++++ b/src/omniglue/dino_extract.py
++@@ -25,7 +25,7 @@ import torch
++ class DINOExtract:
++   """Class to initialize DINO model and extract features from an image."""
++ 
++-  def __init__(self, cpt_path: str, feature_layer: int = 1):
+++  def __init__(self, cpt_path: str, feature_layer: int = 1, device: str = 'cpu'):
++     self.feature_layer = feature_layer
++     self.model = dino.vit_base()
++     state_dict_raw = torch.load(cpt_path, map_location='cpu')
++@@ -35,7 +35,12 @@ class DINOExtract:
++     #   state_dict[k.replace('blocks', 'blocks.0')] = v
++ 
++     self.model.load_state_dict(state_dict_raw)
++-    self.model.eval()
+++    
+++    # Move model to the specified device (GPU if available)
+++    self.device = device
+++    if self.device == 'cuda' or self.device.startswith('cuda:'):
+++      self.model = self.model.cuda()
+++    self.model.eval()
++ 
++     self.image_size_max = 630
++ 
++@@ -110,7 +115,11 @@ class DINOExtract:
++       features: (B, C, H//14, W//14) torch tensor image features.
++     """
++     b, _, h_origin, w_origin = image.shape
++-    out = self.model.get_intermediate_layers(image, n=self.feature_layer)[0]
+++    
+++    # Move image to the same device as model
+++    if self.device == 'cuda' or self.device.startswith('cuda:'):
+++      image = image.cuda()
+++    out = self.model.get_intermediate_layers(image, n=self.feature_layer)[0]
++     h = int(h_origin / self.h_down_rate)
++     w = int(w_origin / self.w_down_rate)
++     dim = out.shape[-1]
+diff --git a/third_party/__init__.py b/third_party/__init__.py
+new file mode 100644
+index 0000000..e69de29

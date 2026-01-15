@@ -1,0 +1,13 @@
+diff --git a/models/liftfeat_wrapper.py b/models/liftfeat_wrapper.py
+index a9c9dff..0aefb00 100644
+--- a/models/liftfeat_wrapper.py
++++ b/models/liftfeat_wrapper.py
+@@ -44,7 +44,7 @@ class NonMaxSuppression(torch.nn.Module):
+ 
+ 
+ def load_model(model, weight_path):
+-    pretrained_weights = torch.load(weight_path, map_location="cpu")
++    pretrained_weights = torch.load(weight_path, map_location="cpu", weights_only=False)
+ 
+     model_keys = set(model.state_dict().keys())
+     pretrained_keys = set(pretrained_weights.keys())

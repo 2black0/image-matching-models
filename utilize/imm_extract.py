@@ -4,6 +4,10 @@ The extracted keypoints are visualized and saved to the output directory. Under 
 but the matches are not used or displayed. This approach allows us to use the same matching functions
 for keypoint extraction without implementing separate functions for each method.
 """
+import os
+import sys
+# Add project root to sys.path
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 import warnings
 
@@ -49,7 +53,7 @@ def parse_args():
     parser.add_argument(
         "--input",
         type=Path,
-        default=Path("assets/example_pairs"),
+        default=Path(os.path.join(os.path.dirname(__file__), "../assets/example_pairs")),
         help="path to image or directory with images (the search is recursive over jpg and png images)",
     )
     parser.add_argument("--out_dir", type=Path, default=None, help="path where outputs are saved")
@@ -57,7 +61,7 @@ def parse_args():
     args = parser.parse_args()
 
     if args.out_dir is None:
-        args.out_dir = Path("outputs") / args.matcher
+        args.out_dir = Path(os.path.join(os.path.dirname(__file__), "../outputs")) / args.matcher
 
     return args
 
