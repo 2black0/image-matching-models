@@ -8,3 +8,5 @@ outputs
 *.egg-info/*
 build
 dataset
+pixi.lock
+.pixi
